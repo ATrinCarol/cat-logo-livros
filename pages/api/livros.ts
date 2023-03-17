@@ -1,13 +1,13 @@
 import type {NextApiRequest, NextApiResponse} from 'next';
-import type {respostaPadraoMsg} from '../../types/respostaPadraoMsg';
-import type {cadastroLivros} from '../../types/cadastroLivros'
-import {livroModel} from '../../models/livroModel';
+import type {messageResponse} from '../../types/messageResponse';
+import type {livrosRequest} from '../../types/livrosRequest'
+import {livrosModel} from '../../models/livrosModel';
 import {conexaoMongoDB} from '../../middlewares/conexaoMongoDB'
 
-const endpointCadastro = async (req: NextApiRequest, res: NextApiResponse<respostaPadraoMsg>) =>{
+const endpointCadastro = async (req: NextApiRequest, res: NextApiResponse<messageResponse>) =>{
 
     if (req.method === 'POST'){
-        const livro = req.body as cadastroLivros;
+        const livro = req.body as livrosRequest;
 
         if (!livro.titulo || livro.titulo.length < 2 ){
             return res.status(400).json({ erro: "Informe um título válido!"});
@@ -25,7 +25,7 @@ const endpointCadastro = async (req: NextApiRequest, res: NextApiResponse<respos
        }
 
         //validar duplicidade de email
-        const livrosComMesmoTitulo = await livroModel.find({ titulo : livro.titulo});
+        const livrosComMesmoTitulo = await livrosModel.find({ titulo : livro.titulo});
         if (livrosComMesmoTitulo && livrosComMesmoTitulo.length > 0){
             return res.status(400).json({ erro: "Livro já cadastrado. Verifique!" })
         }
@@ -37,8 +37,8 @@ const endpointCadastro = async (req: NextApiRequest, res: NextApiResponse<respos
             ano: livro.ano,
             editora: livro.editora
         }
-        await livroModel.create(livroQueSeraSalvo);
-        return res.status(200).json({ msg : 'Livro cadastrado com sucesso'});
+        await livrosModel.create(livroQueSeraSalvo);
+        return res.status(201).json({ msg : 'Livro cadastrado com sucesso'});
     } 
 
     return res.status(405).json({ erro : 'Método informado não é válido'});
